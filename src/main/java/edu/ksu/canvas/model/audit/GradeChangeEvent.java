@@ -1,17 +1,14 @@
 package edu.ksu.canvas.model.audit;
 
-import edu.ksu.canvas.model.User;
-
 import java.util.Date;
 
-public class GradeChange {
+public class GradeChangeEvent {
     private String id;
     private Date createdAt;
     private String eventType;
     private String gradeBefore;
     private String gradeAfter;
-    private User student;
-    private User grader;
+    private GradeChangeLinks links;
 
     public String getId() {
         return id;
@@ -53,19 +50,11 @@ public class GradeChange {
         this.gradeAfter = gradeAfter;
     }
 
-    public User getStudent() {
-        return student;
+    public GradeChangeLinks getLinks() {
+        return links;
     }
 
-    public void setStudent(final User student) {
-        this.student = student;
-    }
-
-    public User getGrader() {
-        return grader;
-    }
-
-    public void setGrader(final User grader) {
-        this.grader = grader;
+    public void setLinks(final GradeChangeLinks links) {
+        this.links = links;
     }
 }
