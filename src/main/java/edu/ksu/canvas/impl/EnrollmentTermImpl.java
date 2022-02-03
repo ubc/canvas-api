@@ -16,11 +16,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EnrollmentTermImpl extends BaseImpl<EnrollmentTerm, EnrollmentTermReader, EnrollmentTermWriter> implements EnrollmentTermReader, EnrollmentTermWriter {
-    private static final Logger LOG = LoggerFactory.getLogger(EnrollmentTermReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EnrollmentTermImpl.class);
 
     public EnrollmentTermImpl(String canvasBaseUrl, Integer apiVersion, OauthToken oauthToken, RestClient restClient,
                               int connectTimeout, int readTimeout, Integer paginationPageSize, Boolean serializeNulls) {
@@ -30,12 +32,20 @@ public class EnrollmentTermImpl extends BaseImpl<EnrollmentTerm, EnrollmentTermR
 
     @Override
     public List<EnrollmentTerm> getEnrollmentTerms(GetEnrollmentTermOptions options) throws IOException {
-        LOG.debug("getting enrollment term with account id " + options.getAccountId());
+        LOG.debug("getting enrollment term with account id {}", options.getAccountId());
         String url = buildCanvasUrl("accounts/" + options.getAccountId() + "/terms/" , options.getOptionsMap());
-        LOG.debug("Final URL of API call: " + url);
         List<Response> response = canvasMessenger.getFromCanvas(oauthToken, url);
         return parseEnrollmentTermList(response);
     }
+
+    @Override
+    public Optional<EnrollmentTerm> getEnrollmentTerm(String accountId, String termId) throws IOException {
+        LOG.debug("getting enrollment term with account id {}", accountId);
+        String url = buildCanvasUrl("accounts/" + accountId + "/terms/" +termId, Collections.emptyMap());
+        Response response = canvasMessenger.getSingleResponseFromCanvas(oauthToken, url);
+        return Optional.of(GsonResponseParser.getDefaultGsonParser(serializeNulls).fromJson(response.getContent(), EnrollmentTerm.class));
+    }
+
 
     //Unfortunately we can't use the generic list parse methods in BaseImpl because Canvas wraps enrollment terms in
     //a useless object at the top level of the response JSON for no reason at all.

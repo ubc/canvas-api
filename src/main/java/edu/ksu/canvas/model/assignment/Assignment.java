@@ -1,5 +1,6 @@
 package edu.ksu.canvas.model.assignment;
 
+import com.google.gson.annotations.SerializedName;
 import edu.ksu.canvas.annotation.CanvasField;
 import edu.ksu.canvas.annotation.CanvasObject;
 import edu.ksu.canvas.model.BaseCanvasModel;
@@ -16,7 +17,7 @@ import java.util.List;
 public class Assignment extends BaseCanvasModel implements Serializable{
 
     private static final long serialVersionUID = 1L;
-    private Integer id;
+    private Long id;
     private String name;
     private String description;
     private Date createdAt;
@@ -38,7 +39,7 @@ public class Assignment extends BaseCanvasModel implements Serializable{
     private String peerReviewCount;
     private Date peerReviewsAssignAt;
     private String groupCategoryId;
-    private Integer needsGradingCount;
+    private Long needsGradingCount;
     private NeedsGradingCount needsGradingCountBySection;
     private String position;
     private Boolean postToSis;
@@ -58,12 +59,17 @@ public class Assignment extends BaseCanvasModel implements Serializable{
     private Boolean notifyOfUpdate;
     private Boolean omitFromFinalGrade;
     private List<String> assignmentVisibility;
+    // Canvas confusingly calls this field "rubric" even though it is only a list of rubric criteria, not a full rubric object
+    @SerializedName("rubric")
+    private List<RubricCriterion> rubricCriteria;
+    // ... and then it adds a truncated list of rubric attributes and calls it a "rubric setting"
+    private RubricSettings rubricSettings;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -245,11 +251,11 @@ public class Assignment extends BaseCanvasModel implements Serializable{
         this.groupCategoryId = groupCategoryId;
     }
 
-    public Integer getNeedsGradingCount() {
+    public Long getNeedsGradingCount() {
         return needsGradingCount;
     }
 
-    public void setNeedsGradingCount(Integer needsGradingCount) {
+    public void setNeedsGradingCount(Long needsGradingCount) {
         this.needsGradingCount = needsGradingCount;
     }
 
@@ -417,6 +423,22 @@ public class Assignment extends BaseCanvasModel implements Serializable{
         this.assignmentVisibility = assignmentVisibility;
     }
 
+    public List<RubricCriterion> getRubricCriteria() {
+        return rubricCriteria;
+    }
+
+    public void setRubricCriteria(List<RubricCriterion> rubricCriteria) {
+        this.rubricCriteria = rubricCriteria;
+    }
+
+    public RubricSettings getRubricSettings() {
+        return rubricSettings;
+    }
+
+    public void setRubricSettings(RubricSettings rubricSettings) {
+        this.rubricSettings = rubricSettings;
+    }
+
     public class ExternalToolTagAttribute implements Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -531,7 +553,7 @@ public class Assignment extends BaseCanvasModel implements Serializable{
         private static final long serialVersionUID = 1L;
 
         private String sectionId;
-        private Integer needsGradingCount;
+        private Long needsGradingCount;
 
         public String getSectionId() {
             return sectionId;
@@ -541,11 +563,11 @@ public class Assignment extends BaseCanvasModel implements Serializable{
             this.sectionId = sectionId;
         }
 
-        public Integer getNeedsGradingCount() {
+        public Long getNeedsGradingCount() {
             return needsGradingCount;
         }
 
-        public void setNeedsGradingCount(Integer needsGradingCount) {
+        public void setNeedsGradingCount(Long needsGradingCount) {
             this.needsGradingCount = needsGradingCount;
         }
     }

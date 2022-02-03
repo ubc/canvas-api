@@ -37,7 +37,7 @@ public class CanvasApiFactory {
      * @param canvasBaseUrl The base URL used to access your Canvas instance
      */
     public CanvasApiFactory(String canvasBaseUrl) {
-        LOG.debug("Creating Canvas API factory with base URL: " + canvasBaseUrl);
+        LOG.debug("Creating Canvas API factory with base URL: {}", canvasBaseUrl);
         this.canvasBaseUrl = canvasBaseUrl;
         this.connectTimeout = DEFAULT_CONNECT_TIMEOUT_MS;
         this.readTimeout = DEFAULT_READ_TIMEOUT_MS;
@@ -51,6 +51,7 @@ public class CanvasApiFactory {
      * @param readTimeout Read timeout in milliseconds. If this is too low, longer API queries could time out prematurely
      */
     public CanvasApiFactory(String canvasBaseUrl, int connectTimeout, int readTimeout) {
+        LOG.debug("Creating Canvas API factory with base URL: {}, connect timeout: {}, read timeout: {}", canvasBaseUrl, connectTimeout, readTimeout);
         this.canvasBaseUrl = canvasBaseUrl;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
@@ -81,7 +82,7 @@ public class CanvasApiFactory {
      * @return An instance of the requested reader class
      */
     public <T extends CanvasReader> T getReader(Class<T> type, OauthToken oauthToken, Integer paginationPageSize) {
-        LOG.debug("Factory call to instantiate class: " + type.getName());
+        LOG.debug("Factory call to instantiate reader class: {}", type.getName());
         RestClient restClient = new RefreshingRestClient();
 
         @SuppressWarnings("unchecked")
@@ -91,7 +92,7 @@ public class CanvasApiFactory {
             throw new UnsupportedOperationException("No implementation for requested interface found: " + type.getName());
         }
 
-        LOG.debug("got class: " + concreteClass);
+        LOG.debug("got class: {}", concreteClass);
         try {
             Constructor<T> constructor = concreteClass.getConstructor(String.class, Integer.class,
                     OauthToken.class, RestClient.class, Integer.TYPE, Integer.TYPE, Integer.class, Boolean.class);
@@ -124,7 +125,7 @@ public class CanvasApiFactory {
      * @return An instantiated instance of the requested writer type
      */
     public <T extends CanvasWriter> T getWriter(Class<T> type, OauthToken oauthToken, Boolean serializeNulls) {
-        LOG.debug("Factory call to instantiate class: " + type.getName());
+        LOG.debug("Factory call to instantiate writer class: {}", type.getName());
         RestClient restClient = new RefreshingRestClient();
 
         @SuppressWarnings("unchecked")
@@ -134,7 +135,7 @@ public class CanvasApiFactory {
             throw new UnsupportedOperationException("No implementation for requested interface found: " + type.getName());
         }
 
-        LOG.debug("got writer class: " + concreteClass);
+        LOG.debug("got writer class: {}", concreteClass);
         try {
             Constructor<T> constructor = concreteClass.getConstructor(String.class, Integer.class, OauthToken.class,
                     RestClient.class, Integer.TYPE, Integer.TYPE, Integer.class, Boolean.class);
@@ -168,6 +169,7 @@ public class CanvasApiFactory {
         readerMap.put(AssignmentGroupReader.class, AssignmentGroupImpl.class);
         readerMap.put(RoleReader.class, RoleImpl.class);
         readerMap.put(ExternalToolReader.class, ExternalToolImpl.class);
+        readerMap.put(FileReader.class, FileImpl.class);
         readerMap.put(LoginReader.class, LoginImpl.class);
         readerMap.put(CalendarReader.class, CalendarEventImpl.class);
         readerMap.put(AccountReportSummaryReader.class, AccountReportSummaryImpl.class);
@@ -176,13 +178,24 @@ public class CanvasApiFactory {
         readerMap.put(ProgressReader.class, ProgressImpl.class);
         readerMap.put(CourseSettingsReader.class, CourseSettingsImpl.class);
         readerMap.put(GradingStandardReader.class, GradingStandardImpl.class);
+        readerMap.put(ModuleReader.class, ModuleImpl.class);
+        readerMap.put(SisImportReader.class, SisImportImpl.class);
+        readerMap.put(SelectiveDataReader.class, SelectiveDataImpl.class);
+        readerMap.put(MigrationIssueReader.class, MigrationIssueImpl.class);
+        readerMap.put(CommunicationChannelReader.class, CommunicationChannelImpl.class);
+        readerMap.put(AuthenticationLogReader.class, AuthenticationLogImpl.class);
+        readerMap.put(FeatureReader.class, FeatureImpl.class);
+        readerMap.put(FeatureFlagReader.class, FeatureFlagImpl.class);
+        readerMap.put(RubricReader.class, RubricImpl.class);
 
+        writerMap.put(AccountWriter.class, AccountImpl.class);
         writerMap.put(AssignmentOverrideWriter.class, AssignmentOverrideImpl.class);
         writerMap.put(AdminWriter.class, AdminImpl.class);
         writerMap.put(AssignmentWriter.class, AssignmentImpl.class);
         writerMap.put(ConversationWriter.class, ConversationImpl.class);
         writerMap.put(CourseWriter.class, CourseImpl.class);
         writerMap.put(TabWriter.class, TabImpl.class);
+        writerMap.put(FileWriter.class, FileImpl.class);
         writerMap.put(EnrollmentWriter.class, EnrollmentImpl.class);
         writerMap.put(QuizQuestionWriter.class, QuizQuestionImpl.class);
         writerMap.put(QuizWriter.class, QuizImpl.class);
@@ -203,5 +216,9 @@ public class CanvasApiFactory {
         writerMap.put(ProgressWriter.class, ProgressImpl.class);
         writerMap.put(CourseSettingsWriter.class, CourseSettingsImpl.class);
         writerMap.put(GradingStandardWriter.class, GradingStandardImpl.class);
+        writerMap.put(SisImportWriter.class, SisImportImpl.class);
+        writerMap.put(CommunicationChannelWriter.class, CommunicationChannelImpl.class);
+        writerMap.put(FeatureFlagWriter.class, FeatureFlagImpl.class);
+        writerMap.put(RubricWriter.class, RubricImpl.class);
     }
 }

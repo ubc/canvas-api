@@ -9,18 +9,19 @@ import edu.ksu.canvas.model.BaseCanvasModel;
 public class AssignmentGroup extends BaseCanvasModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    Integer id;
+    Long id;
     String name;
-    Integer position;
+    Long position;
     Double groupWeight;
     String sisSourceId;
     List<Assignment> assignments;
+    GradingRules rules;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -34,11 +35,11 @@ public class AssignmentGroup extends BaseCanvasModel implements Serializable {
     }
 
     @CanvasField(postKey = "position", array = false)
-    public Integer getPosition() {
+    public Long getPosition() {
         return position;
     }
 
-    public void setPosition(Integer position) {
+    public void setPosition(Long position) {
         this.position = position;
     }
 
@@ -70,4 +71,16 @@ public class AssignmentGroup extends BaseCanvasModel implements Serializable {
     public void setAssignments(List<Assignment> assignments) {
         this.assignments = assignments;
     }
+
+    /**
+     * @return the grading rules that this Assignment Group has
+     */
+    public GradingRules getGradingRules() {
+        return rules;
+    }
+
+    public void setGradingRules(GradingRules rules) {
+        this.rules = rules;
+    }
+
 }

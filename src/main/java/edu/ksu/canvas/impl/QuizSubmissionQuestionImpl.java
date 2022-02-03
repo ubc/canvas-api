@@ -44,7 +44,7 @@ public class QuizSubmissionQuestionImpl extends BaseImpl<QuizSubmissionQuestion,
         if(options == null || answerArrayJson == null) {
             throw new IllegalArgumentException("options and answers must not be null");
         }
-        LOG.debug("answering questions for quiz submission: " + options.getQuizSubmissionid());
+        LOG.debug("answering questions for quiz submission: {}", options.getQuizSubmissionid());
         String url = buildCanvasUrl("quiz_submissions/" + options.getQuizSubmissionid() + "/questions", options.getOptionsMap());
         JsonObject requestBody = new JsonObject();
 
@@ -81,16 +81,16 @@ public class QuizSubmissionQuestionImpl extends BaseImpl<QuizSubmissionQuestion,
                 for (JsonElement question : questionArray) {
                     QuizSubmissionQuestion newQuestion = new QuizSubmissionQuestion();
                     JsonObject questionObject = question.getAsJsonObject();
-                    newQuestion.setId(questionObject.has("id") ? questionObject.get("id").getAsInt() : null);
+                    newQuestion.setId(questionObject.has("id") ? questionObject.get("id").getAsLong() : null);
                     newQuestion.setFlagged(questionObject.has("flagged") ? questionObject.get("flagged").getAsBoolean() : null);
 
-                    List<Integer> answerList = new LinkedList<>();
+                    List<Long> answerList = new LinkedList<>();
                     if (questionObject.has("answer")) {
                         if (questionObject.get("answer").isJsonArray()) {
                             for (JsonElement answer : questionObject.getAsJsonArray("answer")) {
-                                answerList.add(answer.getAsInt());
+                                answerList.add(answer.getAsLong());
                             }
-                        } else answerList.add(questionObject.get("answer").getAsInt());
+                        } else answerList.add(questionObject.get("answer").getAsLong());
                     }
                     newQuestion.setAnswer(answerList);
 

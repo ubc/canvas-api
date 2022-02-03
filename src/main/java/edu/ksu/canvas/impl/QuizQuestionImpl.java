@@ -28,22 +28,22 @@ public class QuizQuestionImpl extends BaseImpl<QuizQuestion, QuizQuestionReader,
 
     @Override
     public List<QuizQuestion> getQuizQuestions(GetQuizQuestionsOptions options) throws IOException {
-        LOG.debug("Fetching quiz questions for quiz " + options.getQuizId() + " in course " + options.getCourseId());
+        LOG.debug("Fetching quiz questions for quiz {} in course {}", options.getQuizId(), options.getCourseId());
         String url = buildCanvasUrl("courses/" + options.getCourseId() + "/quizzes/" + options.getQuizId() + "/questions",
                 options.getOptionsMap());
         return getListFromCanvas(url);
     }
 
     @Override
-    public boolean deleteQuizQuestion(String courseId, Integer quizId, Integer questionId) throws IOException {
-        LOG.debug("Deleting quiz question in course " + courseId + ", quiz " + quizId + ", question " + questionId);
+    public boolean deleteQuizQuestion(String courseId, Long quizId, Long questionId) throws IOException {
+        LOG.debug("Deleting quiz question in course {}, quiz {}, question {}", courseId, quizId, questionId);
         String url = buildCanvasUrl("courses/" + courseId + "/quizzes/" + quizId + "/questions/" + questionId, Collections.emptyMap());
         Response response = canvasMessenger.deleteFromCanvas(oauthToken, url, Collections.emptyMap());
         int responseCode = response.getResponseCode();
         if (responseCode == 204) {
             return true;
         }
-        LOG.error("Canvas returned code " + responseCode + " (success = 204) when deleting question " + questionId);
+        LOG.error("Canvas returned code {} (success = 204) when deleting question {}", responseCode,  questionId);
         return false;
     }
 

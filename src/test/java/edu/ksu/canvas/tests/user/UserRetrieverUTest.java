@@ -80,9 +80,21 @@ public class UserRetrieverUTest extends CanvasTestBase {
 
     @Test
     public void testShowUserDetailsByUserId() throws Exception {
-        int userId = 20;
+        long userId = 20;
         String url = baseUrl + "/api/v1/users/" + String.valueOf(userId);
         fakeRestClient.addSuccessResponse(url, "SampleJson/user/UserById.json");
+        Optional<User> result = userReader.showUserDetails(String.valueOf(userId));
+        User user = result.get();
+        Assert.assertEquals(userId, user.getId());
+        Assert.assertEquals("2011-05-30T16:45:25Z", user.getCreatedAt().toString());
+    }
+
+    @Test
+    public void testShowUserDetailsByUserIdLong() throws Exception {
+        // When users exist from multiple instances the IDs can become very long (larger than an int).
+        long userId = 123450000000000020L;
+        String url = baseUrl + "/api/v1/users/" + String.valueOf(userId);
+        fakeRestClient.addSuccessResponse(url, "SampleJson/user/UserByIdLong.json");
         Optional<User> result = userReader.showUserDetails(String.valueOf(userId));
         User user = result.get();
         Assert.assertEquals(userId, user.getId());
@@ -90,7 +102,7 @@ public class UserRetrieverUTest extends CanvasTestBase {
 
     @Test
     public void testShowUserDetailsBySisUserId() throws Exception {
-        int userId = 31;
+        long userId = 31;
         String sisUserId = "sis_user_id:ABC123";
         String url = baseUrl + "/api/v1/users/" + sisUserId;
         fakeRestClient.addSuccessResponse(url, "SampleJson/user/UserBySisUserId.json");
@@ -101,7 +113,7 @@ public class UserRetrieverUTest extends CanvasTestBase {
 
     @Test
     public void testShowUserDetailsBySelfIdentifier() throws Exception {
-        int userId = 32;
+        long userId = 32;
         String selfIdentifier = "self";
         String url = baseUrl + "/api/v1/users/" + selfIdentifier;
         fakeRestClient.addSuccessResponse(url, "SampleJson/user/UserBySelfIdentifier.json");
@@ -112,7 +124,7 @@ public class UserRetrieverUTest extends CanvasTestBase {
 
     @Test
     public void testShowUserDetailsBySisIntegrationId() throws Exception {
-        int userId = 33;
+        long userId = 33;
         String sisIntegrationUserId = "sis_integration_id:ABC123";
         String url = baseUrl + "/api/v1/users/" + sisIntegrationUserId;
         fakeRestClient.addSuccessResponse(url, "SampleJson/user/UserBySisIntegrationId.json");

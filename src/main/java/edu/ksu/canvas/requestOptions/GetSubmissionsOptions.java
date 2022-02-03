@@ -5,17 +5,21 @@ import java.util.List;
 public class GetSubmissionsOptions extends BaseOptions {
 
     private String canvasId;
-    private Integer assignmentId;
+    private Long assignmentId;
     private String userId;
 
     public enum Include {
         //Submissions can optionally have sub-objects returned with them. The commented out ones are not implemented yet
-        //SUBMISSION_HISTORY, RUBRIC_ASSESSMENT, GROUP
-        ASSIGNMENT, COURSE, SUBMISSION_COMMENTS, USER, VISIBILITY;
+        // GROUP
+        ASSIGNMENT, COURSE, SUBMISSION_COMMENTS, USER, VISIBILITY, SUBMISSION_HISTORY, RUBRIC_ASSESSMENT, FULL_RUBRIC_ASSESSMENT;
 
         public String toString() {
             return name().toLowerCase();
         }
+    }
+
+    public GetSubmissionsOptions(final String canvasId) {
+        this.canvasId = canvasId;
     }
 
     /**
@@ -23,7 +27,7 @@ public class GetSubmissionsOptions extends BaseOptions {
      * @param canvasId The Course or Section ID, depending on which API is being targeted. May also be an SIS ID with appropriate prefix
      * @param assignmentId The Canvas ID of the assignment to query for submissions
      */
-    public GetSubmissionsOptions(final String canvasId, final Integer assignmentId) {
+    public GetSubmissionsOptions(final String canvasId, final Long assignmentId) {
         this.canvasId = canvasId;
         this.assignmentId = assignmentId;
     }
@@ -34,7 +38,7 @@ public class GetSubmissionsOptions extends BaseOptions {
      * @param assignmentId The Canvas ID of the assignment to query for submissions
      * @param userId The Canvas ID of the user to query (or SIS user ID with the appropriate prefix)
      */
-    public GetSubmissionsOptions(final String canvasId, final Integer assignmentId, String userId) {
+    public GetSubmissionsOptions(final String canvasId, final Long assignmentId, String userId) {
         this.canvasId = canvasId;
         this.assignmentId = assignmentId;
         this.userId = userId;
@@ -61,6 +65,11 @@ public class GetSubmissionsOptions extends BaseOptions {
         return this;
     }
 
+    public GetSubmissionsOptions userIds(List<String> userIds) {
+        addStringList("student_ids[]", userIds);
+        return this;
+    }
+
     public String getCanvasId() {
         return canvasId;
     }
@@ -69,11 +78,11 @@ public class GetSubmissionsOptions extends BaseOptions {
         this.canvasId = canvasId;
     }
 
-    public Integer getAssignmentId() {
+    public Long getAssignmentId() {
         return assignmentId;
     }
 
-    public void setAssignmentId(final Integer assignmentId) {
+    public void setAssignmentId(final Long assignmentId) {
         this.assignmentId = assignmentId;
     }
 

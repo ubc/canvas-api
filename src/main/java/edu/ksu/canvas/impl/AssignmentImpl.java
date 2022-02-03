@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class AssignmentImpl extends BaseImpl<Assignment, AssignmentReader, AssignmentWriter> implements AssignmentReader, AssignmentWriter{
-    private static final Logger LOG = LoggerFactory.getLogger(AssignmentReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AssignmentImpl.class);
 
     public AssignmentImpl(String canvasBaseUrl, Integer apiVersion, OauthToken oauthToken, RestClient restClient,
                           int connectTimeout, int readTimeout, Integer paginationPageSize, Boolean serializeNulls) {
@@ -62,12 +62,12 @@ public class AssignmentImpl extends BaseImpl<Assignment, AssignmentReader, Assig
     }
 
     @Override
-    public Optional<Assignment> deleteAssignment(String courseId, Integer assignmentId) throws IOException {
+    public Optional<Assignment> deleteAssignment(String courseId, Long assignmentId) throws IOException {
         Map<String, List<String>> postParams = new HashMap<>();
         postParams.put("event", Collections.singletonList("delete"));
         String createdUrl = buildCanvasUrl("courses/" + courseId + "/assignments/" + assignmentId, Collections.emptyMap());
         Response response = canvasMessenger.deleteFromCanvas(oauthToken, createdUrl, postParams);
-        LOG.debug("response " + response.toString());
+        LOG.debug("response {}", response.toString());
         if(response.getErrorHappened() || response.getResponseCode() != 200){
             LOG.debug("Failed to delete assignment, error message: " + response.toString());
             return Optional.empty();
