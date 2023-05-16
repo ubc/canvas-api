@@ -12,8 +12,17 @@ public interface CanvasReader<T, READERTYPE extends CanvasReader> {
      */
     READERTYPE withCallback(Consumer<List<T>> responseConsumer);
 
+    READERTYPE withCallback(CancellableCallback<List<T>> responseCallback);
+
     READERTYPE readAsCanvasUser(String masqueradeAs);
 
     READERTYPE readAsSisUser(String masqueradeAs);
 
+    @FunctionalInterface
+    public interface CancellableCallback<U> {
+    	/**
+    	 * @return true to continue if more data is available, or false to stop fetching more pages.
+    	 */
+    	public boolean accept(U value);
+    }
 }

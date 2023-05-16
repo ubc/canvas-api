@@ -36,7 +36,7 @@ public abstract class BaseImpl<T, READERTYPE extends CanvasReader, WRITERTYPE ex
     protected OauthToken oauthToken;
     protected ResponseParser responseParser;
     protected CanvasMessenger canvasMessenger;
-    protected Consumer<List<T>> responseCallback;
+    protected CancellableCallback< List< T > > responseCallback;
     protected String masqueradeAs;
     protected String masqueradeType;
     protected Integer paginationPageSize;
@@ -74,7 +74,7 @@ public abstract class BaseImpl<T, READERTYPE extends CanvasReader, WRITERTYPE ex
     }
 
     protected List<T> getListFromCanvas(String url) throws IOException {
-        Consumer<Response> consumer = null;
+        CancellableCallback<Response> consumer = null;
         if (responseCallback != null) {
             consumer = response -> responseCallback.accept(responseParser.parseToList(listType(), response));
         }
@@ -85,10 +85,20 @@ public abstract class BaseImpl<T, READERTYPE extends CanvasReader, WRITERTYPE ex
 
     @Override
     public READERTYPE withCallback(Consumer<List<T>> responseReceivedCallBack) {
-        responseCallback = responseReceivedCallBack;
+        responseCallback = items -> {
+        	responseReceivedCallBack.accept( items );
+        	return true;
+        };
         return (READERTYPE) this;
     }
 
+    @Override
+    public READERTYPE withCallback( CancellableCallback< List< T > > responseReceivedCallBack )
+    {
+        responseCallback = responseReceivedCallBack;
+        return (READERTYPE) this;
+    }
+    
     @Override
     public READERTYPE readAsCanvasUser(String masqueradeAs) {
         return readAsUser(masqueradeAs, CanvasConstants.MASQUERADE_CANVAS_USER);

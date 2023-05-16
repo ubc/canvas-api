@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 
 import edu.ksu.canvas.exception.InvalidOauthTokenException;
 import edu.ksu.canvas.interfaces.CanvasMessenger;
+import edu.ksu.canvas.interfaces.CanvasReader.CancellableCallback;
 import edu.ksu.canvas.net.Response;
 import edu.ksu.canvas.net.RestClient;
 import edu.ksu.canvas.oauth.OauthToken;
@@ -41,7 +42,7 @@ public class RestCanvasMessenger implements CanvasMessenger {
     }
 
 
-    public List<Response> getFromCanvas(@NotNull OauthToken oauthToken, @NotNull String url, Consumer<Response> callback) throws InvalidOauthTokenException, IOException {
+    public List<Response> getFromCanvas(@NotNull OauthToken oauthToken, @NotNull String url, CancellableCallback<Response> callback) throws InvalidOauthTokenException, IOException {
         LOG.debug("Sending GET request to: {}", url);
         final List<Response> responses = new ArrayList<>();
         while (StringUtils.isNotBlank(url)) {
@@ -52,8 +53,8 @@ public class RestCanvasMessenger implements CanvasMessenger {
             }
             responses.add(response);
             url = response.getNextLink();
-            if (callback != null) {
-                callback.accept(response);
+            if (callback != null && !callback.accept(response)) {
+            	break;
             }
         }
         return responses;
