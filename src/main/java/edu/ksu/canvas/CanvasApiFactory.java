@@ -1,17 +1,14 @@
 package edu.ksu.canvas;
 
+import java.lang.reflect.*;
+import java.util.*;
+
+import org.slf4j.*;
+
 import edu.ksu.canvas.impl.*;
 import edu.ksu.canvas.interfaces.*;
-import edu.ksu.canvas.net.RestClient;
-import edu.ksu.canvas.net.RefreshingRestClient;
+import edu.ksu.canvas.net.*;
 import edu.ksu.canvas.oauth.OauthToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Entry point for using the Canvas API library. It constructs concrete
@@ -28,19 +25,19 @@ public class CanvasApiFactory {
     private static final int DEFAULT_READ_TIMEOUT_MS = 120000;
     Map<Class<? extends CanvasReader>, Class<? extends BaseImpl>> readerMap;
     Map<Class<? extends CanvasWriter>, Class<? extends BaseImpl>> writerMap;
-    private String canvasBaseUrl;
-    private int connectTimeout;
-    private int readTimeout;
+    private final String canvasBaseUrl;
+    private final int connectTimeout;
+    private final int readTimeout;
 
     /**
      * Construct an API factory for a given instance of Canvas.
      * @param canvasBaseUrl The base URL used to access your Canvas instance
      */
-    public CanvasApiFactory(String canvasBaseUrl) {
+    public CanvasApiFactory(final String canvasBaseUrl) {
         LOG.debug("Creating Canvas API factory with base URL: {}", canvasBaseUrl);
         this.canvasBaseUrl = canvasBaseUrl;
-        this.connectTimeout = DEFAULT_CONNECT_TIMEOUT_MS;
-        this.readTimeout = DEFAULT_READ_TIMEOUT_MS;
+        connectTimeout = DEFAULT_CONNECT_TIMEOUT_MS;
+        readTimeout = DEFAULT_READ_TIMEOUT_MS;
         setupClassMap();
     }
 
@@ -50,7 +47,7 @@ public class CanvasApiFactory {
      * @param connectTimeout Connection timeout in milliseconds
      * @param readTimeout Read timeout in milliseconds. If this is too low, longer API queries could time out prematurely
      */
-    public CanvasApiFactory(String canvasBaseUrl, int connectTimeout, int readTimeout) {
+    public CanvasApiFactory(final String canvasBaseUrl, final int connectTimeout, final int readTimeout) {
         LOG.debug("Creating Canvas API factory with base URL: {}, connect timeout: {}, read timeout: {}", canvasBaseUrl, connectTimeout, readTimeout);
         this.canvasBaseUrl = canvasBaseUrl;
         this.connectTimeout = connectTimeout;
@@ -65,7 +62,7 @@ public class CanvasApiFactory {
      * @param <T> The reader type to request an instance of
      * @return A reader implementation class
      */
-    public <T extends CanvasReader> T getReader(Class<T> type, OauthToken oauthToken) {
+    public <T extends CanvasReader> T getReader(final Class<T> type, final OauthToken oauthToken) {
         return getReader(type, oauthToken, null);
     }
 
@@ -81,11 +78,12 @@ public class CanvasApiFactory {
      * @param <T> The reader type to request an instance of
      * @return An instance of the requested reader class
      */
-    public <T extends CanvasReader> T getReader(Class<T> type, OauthToken oauthToken, Integer paginationPageSize) {
+    public <T extends CanvasReader> T getReader(final Class<T> type, final OauthToken oauthToken, final Integer paginationPageSize) {
         LOG.debug("Factory call to instantiate reader class: {}", type.getName());
-        RestClient restClient = new RefreshingRestClient();
+        final RestClient restClient = new RefreshingRestClient();
 
         @SuppressWarnings("unchecked")
+		final
         Class<T> concreteClass = (Class<T>)readerMap.get(type);
 
         if (concreteClass == null) {
@@ -94,7 +92,7 @@ public class CanvasApiFactory {
 
         LOG.debug("got class: {}", concreteClass);
         try {
-            Constructor<T> constructor = concreteClass.getConstructor(String.class, Integer.class,
+            final Constructor<T> constructor = concreteClass.getConstructor(String.class, Integer.class,
                     OauthToken.class, RestClient.class, Integer.TYPE, Integer.TYPE, Integer.class, Boolean.class);
             return constructor.newInstance(canvasBaseUrl, CANVAS_API_VERSION, oauthToken, restClient,
                     connectTimeout, readTimeout, paginationPageSize, false);
@@ -110,7 +108,7 @@ public class CanvasApiFactory {
      * @param <T> A writer implementation
      * @return A writer implementation class
      */
-    public <T extends CanvasWriter> T getWriter(Class<T> type, OauthToken oauthToken) {
+    public <T extends CanvasWriter> T getWriter(final Class<T> type, final OauthToken oauthToken) {
         return getWriter(type, oauthToken, false);
     }
 
@@ -124,11 +122,12 @@ public class CanvasApiFactory {
      * @param <T> A writer implementation
      * @return An instantiated instance of the requested writer type
      */
-    public <T extends CanvasWriter> T getWriter(Class<T> type, OauthToken oauthToken, Boolean serializeNulls) {
+    public <T extends CanvasWriter> T getWriter(final Class<T> type, final OauthToken oauthToken, final Boolean serializeNulls) {
         LOG.debug("Factory call to instantiate writer class: {}", type.getName());
-        RestClient restClient = new RefreshingRestClient();
+        final RestClient restClient = new RefreshingRestClient();
 
         @SuppressWarnings("unchecked")
+		final
         Class<T> concreteClass = (Class<T>) writerMap.get(type);
 
         if (concreteClass == null) {
@@ -137,7 +136,7 @@ public class CanvasApiFactory {
 
         LOG.debug("got writer class: {}", concreteClass);
         try {
-            Constructor<T> constructor = concreteClass.getConstructor(String.class, Integer.class, OauthToken.class,
+            final Constructor<T> constructor = concreteClass.getConstructor(String.class, Integer.class, OauthToken.class,
                     RestClient.class, Integer.TYPE, Integer.TYPE, Integer.class, Boolean.class);
             return constructor.newInstance(canvasBaseUrl, CANVAS_API_VERSION, oauthToken, restClient,
                     connectTimeout, readTimeout, null, serializeNulls);
@@ -155,6 +154,8 @@ public class CanvasApiFactory {
         readerMap.put(AssignmentReader.class, AssignmentImpl.class);
         readerMap.put(ConversationReader.class, ConversationImpl.class);
         readerMap.put(CourseReader.class, CourseImpl.class);
+        readerMap.put( CustomGradebookColumnsReader.class, CustomGradebookColumnsImpl.class );
+        readerMap.put( CustomGradebookColumnsDataReader.class, CustomGradebookColumnsDataImpl.class );
         readerMap.put(TabReader.class, TabImpl.class);
         readerMap.put(EnrollmentReader.class, EnrollmentImpl.class);
         readerMap.put(QuizQuestionReader.class, QuizQuestionImpl.class);
@@ -195,6 +196,8 @@ public class CanvasApiFactory {
         writerMap.put(AssignmentWriter.class, AssignmentImpl.class);
         writerMap.put(ConversationWriter.class, ConversationImpl.class);
         writerMap.put(CourseWriter.class, CourseImpl.class);
+        writerMap.put( CustomGradebookColumnsWriter.class, CustomGradebookColumnsImpl.class );
+        writerMap.put( CustomGradebookColumnsDataWriter.class, CustomGradebookColumnsDataImpl.class );
         writerMap.put(TabWriter.class, TabImpl.class);
         writerMap.put(FileWriter.class, FileImpl.class);
         writerMap.put(EnrollmentWriter.class, EnrollmentImpl.class);
