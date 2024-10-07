@@ -1,21 +1,14 @@
 package edu.ksu.canvas.model;
 
-import edu.ksu.canvas.annotation.CanvasField;
-import edu.ksu.canvas.annotation.CanvasObject;
+import java.lang.reflect.*;
+import java.util.*;
+
+import org.slf4j.*;
+
+import com.google.gson.*;
+
+import edu.ksu.canvas.annotation.*;
 import edu.ksu.canvas.impl.GsonResponseParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 public abstract class BaseCanvasModel {
     private static final Logger LOG = LoggerFactory.getLogger(BaseCanvasModel.class);
@@ -30,18 +23,18 @@ public abstract class BaseCanvasModel {
         for (Method method : clazz.getMethods()) {
             CanvasField canvasFieldAnnotation = method.getAnnotation(CanvasField.class);
             if (canvasFieldAnnotation != null && canvasFieldAnnotation.postKey() != null) {
-                final String postKey = getPostKey(canvasFieldAnnotation);
+                String postKey = getPostKey(canvasFieldAnnotation);
                 try {
-                    final List<String> fieldValues = getFieldValues(method);
-                    if ((fieldValues != null && !fieldValues.isEmpty()) || includeNulls) {
+                    List<String> fieldValues = getFieldValues(method);
+                    if (fieldValues != null && !fieldValues.isEmpty() || includeNulls) {
                         if (postMap.containsKey(postKey)) {
                             postMap.get(postKey).addAll(fieldValues);
                         } else {
                             postMap.put(postKey, fieldValues);
                         }
                     }
-                } catch (final IllegalAccessException | InvocationTargetException e) {
-                    final String message = "Could not access Canvas model getter for" + postKey;
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    String message = "Could not access Canvas model getter for" + postKey;
                     LOG.error(message, e);
                     throw new IllegalStateException(message, e);
                 }
@@ -71,6 +64,11 @@ public abstract class BaseCanvasModel {
         return jsonObject;
     }
 
+    public JsonObject toJsonArrayObject(Boolean serializeNulls) {
+        JsonElement element = GsonResponseParser.getDefaultGsonParser(serializeNulls).toJsonTree(this);
+        return (JsonObject)element;
+    }
+
     private String getPostKey(CanvasField canvasFieldAnnotation) {
         if (!canvasFieldAnnotation.array()) {
             return canvasFieldAnnotation.postKey();
@@ -90,17 +88,17 @@ public abstract class BaseCanvasModel {
         return canvasObjectAnnotation.postKey() + "[" + canvasFieldAnnotation.postKey() + "]";
     }
 
-    private List<String> getFieldValues(final Method getter) throws InvocationTargetException, IllegalAccessException {
-        final List<String> fieldValues = new ArrayList<>(1);
-        final Class<?> returnType = getter.getReturnType();
-        final Object returnValue = getter.invoke(this);
+    private List<String> getFieldValues(Method getter) throws InvocationTargetException, IllegalAccessException {
+        List<String> fieldValues = new ArrayList<>(1);
+        Class<?> returnType = getter.getReturnType();
+        Object returnValue = getter.invoke(this);
 
         if (returnValue == null) {
            return Collections.emptyList();
         }
 
         if (Iterable.class.isAssignableFrom(returnType)) {
-            for (final Object value : (Iterable) returnValue) {
+            for (Object value : (Iterable) returnValue) {
                 fieldValues.add(String.valueOf(value));
             }
         }

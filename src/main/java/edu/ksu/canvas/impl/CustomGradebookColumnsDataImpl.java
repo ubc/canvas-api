@@ -2,7 +2,9 @@ package edu.ksu.canvas.impl;
 
 import edu.ksu.canvas.interfaces.CustomGradebookColumnsDataReader;
 import edu.ksu.canvas.interfaces.CustomGradebookColumnsDataWriter;
+import edu.ksu.canvas.model.BulkColumnData;
 import edu.ksu.canvas.model.ColumnDatum;
+import edu.ksu.canvas.model.Progress;
 import edu.ksu.canvas.net.Response;
 import edu.ksu.canvas.net.RestClient;
 import edu.ksu.canvas.oauth.OauthToken;
@@ -52,5 +54,18 @@ public class CustomGradebookColumnsDataImpl extends BaseImpl< ColumnDatum, Custo
 			return Optional.empty( );
 		}
 		return responseParser.parseToObject( ColumnDatum.class, response );
+	}
+
+	@Override
+	public Optional< Progress > bulkUpdateColumnData( final String courseId, final BulkColumnData data ) throws IOException
+	{
+		LOG.debug( "Bulk updating column data" );
+		final String url = buildCanvasUrl( "courses/" + courseId+ "/custom_gradebook_column_data", Collections.emptyMap( ) );
+		final Response response = canvasMessenger.sendJsonPutToCanvas( oauthToken, url, data.toJsonArrayObject( serializeNulls ) );
+		if( response.getErrorHappened( ) || response.getResponseCode( ) != 200 ) {
+			LOG.debug( "Failed to bulk update custom gradebook column data, error message: {}", response );
+			return Optional.empty( );
+		}
+		return responseParser.parseToObject( Progress.class, response );
 	}
 }
