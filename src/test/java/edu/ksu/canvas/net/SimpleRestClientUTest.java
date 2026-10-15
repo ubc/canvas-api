@@ -15,6 +15,7 @@ import org.junit.runners.JUnit4;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -50,6 +51,35 @@ public class SimpleRestClientUTest extends LocalServerTestBase {
         registerUrlResponse(url, "/SampleJson/BlankResponse.json", 403, Collections.emptyMap());
 
         restClient.sendApiGet(emptyAdminToken, baseUrl + url, 100, 100);
+    }
+
+    @Test(expected = ThrottlingException.class)
+    public void http429ThrottlingThrowsException() throws Exception {
+        String url = "/throttledUrl";
+        registerUrlResponse(url, "/SampleJson/BlankResponse.json", 429, Collections.emptyMap());
+        restClient.sendApiGet(emptyAdminToken, baseUrl + url, 100, 100);
+    }
+
+    @Test(expected = RateLimitException.class)
+    public void http429WithQuotaExhaustedThrowsRateLimitException() throws Exception {
+        String url = "/rateLimitedUrl";
+        registerUrlResponse(url, "/SampleJson/BlankResponse.json", 429, rateLimitHeaders("0.0"));
+        restClient.sendApiGet(emptyAdminToken, baseUrl + url, 100, 100);
+    }
+
+    @Test
+    public void successWithQuotaExhaustedReturnsResponse() throws Exception {
+        String url = "/quotaUsedUpUrl";
+        registerUrlResponse(url, "/SampleJson/BlankResponse.json", 200, rateLimitHeaders("0.0"));
+        Response response = restClient.sendApiGet(emptyAdminToken, baseUrl + url, 100, 100);
+        assertNotNull(response);
+    }
+
+    private static Map<String, String> rateLimitHeaders(String remaining) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-request-cost", "1.0");
+        headers.put("x-rate-limit-remaining", remaining);
+        return headers;
     }
 
     @Test(expected = RetriableException.class)

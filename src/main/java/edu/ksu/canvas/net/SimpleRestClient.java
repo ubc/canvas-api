@@ -305,9 +305,10 @@ public class SimpleRestClient implements RestClient {
             xRateCost = Double.parseDouble(httpResponse.getFirstHeader("x-request-cost").getValue());
             xRateLimitRemaining = Double.parseDouble(httpResponse.getFirstHeader("x-rate-limit-remaining").getValue());
 
-            //Throws a 403 with a "Rate Limit Exceeded" error message if the API throttle limit is hit.
+            //Canvas returns a 429 (formerly a 403) with a "Rate Limit Exceeded" error message if the API throttle limit is hit.
             //See https://canvas.instructure.com/doc/api/file.throttling.html.
-            if(xRateLimitRemaining < rateLimitThreshold) {
+            //A successful response that leaves the quota low is not an error: Canvas has carried out the request.
+            if(xRateLimitRemaining < rateLimitThreshold && (statusCode == 403 || statusCode == 429)) {
                 LOG.error("Canvas API rate limit exceeded. Bucket quota: " + xRateLimitRemaining + " Cost: " + xRateCost
                         + " Threshold: " + rateLimitThreshold + " HTTP status: " + statusCode + " Requested URL: " + request.getURI());
                 throw new RateLimitException(extractErrorMessageFromResponse(httpResponse), String.valueOf(request.getURI()));
@@ -326,7 +327,7 @@ public class SimpleRestClient implements RestClient {
             LOG.error("User is not authorized to perform this action");
             throw new UnauthorizedException();
         }
-        if(statusCode == 403) {
+        if(statusCode == 403 || statusCode == 429) {
             LOG.error("Canvas has throttled this request. Requested URL: " + request.getURI());
             throw new ThrottlingException(extractErrorMessageFromResponse(httpResponse), String.valueOf(request.getURI()));
         }
